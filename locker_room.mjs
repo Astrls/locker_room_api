@@ -24,25 +24,7 @@ app.use("/api/users", userRouter);
 app.use("/api/lobby", lobbyRouter);
 app.use("/api/messages", messRouter);
 
-// REGISTER
-// app.post("/api/register", uniqueChecker, (req, res) => {
-//   const user = {
-//     email: req.body.email,
-//     password: req.body.password
-//   };
-//   client.connect((err) => {
-//     if (err) console.log(err);
-//     client.query(
-//       `INSERT INTO users (email, password) VALUES ($1,$2)`,
-//       [user.email, user.password],
-//       (err, result) => {
-//         if (err) throw err;
-//         res.status(201).send(result);
-//       }
-//     );
-//   });
-// });
-
+//REGISTER
 app.post("/api/register", uniqueChecker, async (req, res) => {
   try {
     const hashedPw = await bcrypt.hash(req.body.password, 10);
@@ -94,14 +76,6 @@ app.post("/api/login", (req, res) => {
   });
 });
 
-//TESTER
-app.get("/test", async (req, res) => {
-  console.log(
-    await bcrypt.compare(
-      "test",
-      "$2b$10$bIgJihayW7kUMr5CFDL.GuzB.yrsIobzaPLLcxdU.rwHBKPeyeWC2"
-    )
-  );
-});
+
 
 app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
