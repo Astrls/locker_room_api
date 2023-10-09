@@ -7,8 +7,9 @@ const authToken = (req, res, next) => {
     if (token == null) {
       return res.sendStatus(401);
     }
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err) => {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err,payload) => {
       if (err) return res.sendStatus(403);
+      res.locals.payload = payload
       next();
     });
   };

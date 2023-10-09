@@ -3,7 +3,8 @@ import express from "express";
 import client from "./db.mjs";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import authToken from "./middleware/jwt.mjs";
 
 //Import middleware
 import uniqueChecker from "./middleware/unique_db_checker.mjs";
@@ -62,9 +63,17 @@ app.post("/api/login", (req, res) => {
         try {
           if (await bcrypt.compare(user.password, result.rows[0].password)) {
             // res.send("you're logged in :)");
-            const user_id = {user_id: result.rows[0].user_id}
-            const accessToken = jwt.sign(user_id, process.env.ACCESS_TOKEN_SECRET)
-            res.json({accessToken: accessToken})
+            const user_id = { user_id: result.rows[0].user_id };
+            const accessToken = jwt.sign(
+              user_id,
+              process.env.ACCESS_TOKEN_SECRET
+            );
+            res
+              .cookie("accesToken", accessToken, {
+                httpOnly: true,
+                sameSite: "strict",
+              })
+              .json({ token: accessToken });
           } else {
             res.status(403).send("Wrong credentials");
           }
@@ -75,7 +84,5 @@ app.post("/api/login", (req, res) => {
     );
   });
 });
-
-
 
 app.listen(PORT, () => console.log(`http://localhost:${PORT}`));

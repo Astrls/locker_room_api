@@ -1,25 +1,29 @@
 import express from "express";
 import client from "../db.mjs";
 import lobbyAdmin from "../middleware/lobby_admin.mjs";
+import jwt from "jsonwebtoken"
+import authToken from "../middleware/jwt.mjs";
 
 const lobbyRouter = express.Router();
 lobbyRouter.use(express.json());
 
 // Create a new message loby
-lobbyRouter.post("/", (req, res) => {
+lobbyRouter.post("/", authToken, (req, res) => {
+  const lobbyName = req.body.name
+  const userId = res.locals.payload.user_id
   client.connect((err) => {
     if (err) console.log(err);
     client.query(
-      "INSERT INTO lobbies (name,fk_user_id) VALUES ($1,$2) RETURNING lobby_id",
-      [req.body.name, req.body.user_id],
+      "INSERT INTO lobbies (name,lobby_admin_id) VALUES ($1,$2) RETURNING lobby_id",
+      [lobbyName, userId],
       (err, result) => {
         if (err) throw err;
         client.query(
           "INSERT INTO lobby_access (fk_lobby_id,fk_user_id) VALUES ($1,$2)",
-          [result.rows[0].lobby_id, req.body.user_id],
+          [result.rows[0].lobby_id, userId],
           (err, result2) => {
             if (err) throw err;
-            res.send("step 2 ok");
+            res.send(`Created lobby ${lobbyName} with id ${result.rows[0].lobby_id}`);
           }
         );
       }
